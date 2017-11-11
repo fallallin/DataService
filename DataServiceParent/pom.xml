@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>co.com.kallsonys.DataService</groupId>
+	<artifactId>DataServiceParent</artifactId>
+	<version>1.0.17</version>
+	<packaging>pom</packaging>
+
+	<name>DataServiceParent</name>
+	<description>
+	POM Maestro para el proyecto de capa de servicios  
+	</description>
+
+	<organization>
+		<name>Data Tools</name>
+		<url>http://www.kallsonys.com.co</url>
+	</organization>
+	<profiles>
+		<!-- Perfil desarrollo -->
+		<profile>
+			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<project.stage>Development</project.stage>
+			</properties>
+			<modules>
+				<module>../DataServiceEJBClient</module>
+				<module>../DataServiceEJB</module>
+				<module>../DataServiceOracleEJBClient</module>
+				<module>../DataServiceOracleEJB</module>
+				<module>../DataServiceWeb</module>
+				<module>../DataServiceEAR</module>
+			</modules>
+		</profile>
+
+		<!-- Perfil release version -->
+		<profile>
+			<id>release</id>
+			<properties>
+				<project.stage>Production</project.stage>
+			</properties>
+			<modules>
+				<module>../DataServiceEJBClient</module>
+				<module>../DataServiceEJB</module>
+				<module>../DataServiceOracleEJBClient</module>
+				<module>../DataServiceOracleEJB</module>
+				<module>../DataServiceWeb</module>
+				<module>../DataServiceEAR</module>
+			</modules>
+		</profile>
+
+	</profiles>
+
+	<properties>
+		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+		<DataServiceEJB.version>1.0.17</DataServiceEJB.version>
+		<DataServiceOracleEJB.version>1.0.17</DataServiceOracleEJB.version>
+		<!-- API Java EE 6.0 -->
+		<jboss-javaee-6.0.version>3.0.2.Final</jboss-javaee-6.0.version>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ejb-plugin</artifactId>
+					<version>2.3</version>
+					<configuration>
+						<ejbVersion>3.1</ejbVersion>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-ear-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jboss.as.plugins</groupId>
+					<artifactId>jboss-as-maven-plugin</artifactId>
+					<version>7.4.Final</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<target>1.7</target>
+						<source>1.7</source>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.12</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<target>1.7</target>
+					<source>1.7</source>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

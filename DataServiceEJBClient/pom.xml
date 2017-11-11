@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>co.com.kallsonys.DataService</groupId>
+		<artifactId>DataServiceParent</artifactId>
+		<version>1.0.17</version>
+		<relativePath>../DataServiceParent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>DataServiceEJBClient</artifactId>
+	<name>DataServiceEJBClient</name>
+	<packaging>jar</packaging>
+
+	<repositories>
+		<repository>
+			<id>repositorio-red-hat</id>
+			<name>repo-red-hat</name>
+			<url>https://mvnrepository.com/repos/redhat-ga</url>
+		</repository>
+		<repository>
+			<id>repositorio-red-hat-2</id>
+			<name>repo-red-hat-2</name>
+			<url>https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.jboss.spec/jboss-javaee-6.0 -->
+		<dependency>
+			<groupId>org.jboss.spec</groupId>
+			<artifactId>jboss-javaee-6.0</artifactId>
+			<version>${jboss-javaee-6.0.version}</version>
+			<type>pom</type>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>3.3.1.Final-redhat-1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jaxrs -->
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>3.3.0.Final-redhat-1</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>replacer</artifactId>
+				<version>1.5.3</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<file>${project.build.directory}/classes/servicelayer-artefacto.properties</file>
+					<replacements>
+						<replacement>
+							<token>versionId</token>
+							<value>${project.version}</value>
+						</replacement>
+					</replacements>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
