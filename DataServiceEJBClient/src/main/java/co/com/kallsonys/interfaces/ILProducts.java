@@ -5,7 +5,9 @@ import java.util.List;
 import javax.ejb.Local;
 
 import co.com.kallsonys.dto.request.CreateProductRequestDTO;
+import co.com.kallsonys.dto.request.GetCategByLstIdProductRequestDTO;
 import co.com.kallsonys.dto.request.RequestProductDetailDTO;
+import co.com.kallsonys.dto.response.GetCategoriesByLstIdProductResponseDTO;
 import co.com.kallsonys.dto.response.GetProductByIdResponseDTO;
 import co.com.kallsonys.dto.response.ProductDetailResponseDTO;
 
@@ -43,4 +45,12 @@ public interface ILProducts {
 	 * @author FALLALLIN
 	 */
 	public CreateProductRequestDTO updateProduct(CreateProductRequestDTO productRequest);
+	
+	/**
+	 * 
+	 * @param request
+	 * @return
+	 * @author FALLALLIN
+	 */
+	public GetCategoriesByLstIdProductResponseDTO getCategByLstIdProduct(GetCategByLstIdProductRequestDTO request);
 }

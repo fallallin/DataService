@@ -3,6 +3,7 @@ package co.com.kallsonys.dto.response;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 public class OrderResponseDTO implements Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
@@ -13,6 +14,7 @@ public class OrderResponseDTO implements Serializable, Cloneable {
 	private String comments;
 	private StatusResponseDTO status;
 	private AddressesResponseDTO address;
+	private List<ItemResponseDTO> items;
 
 	public Integer getId() {
 		return id;
@@ -60,6 +62,14 @@ public class OrderResponseDTO implements Serializable, Cloneable {
 
 	public void setAddress(AddressesResponseDTO address) {
 		this.address = address;
+	}
+
+	public List<ItemResponseDTO> getItems() {
+		return items;
+	}
+
+	public void setItems(List<ItemResponseDTO> items) {
+		this.items = items;
 	}
 
 }

@@ -16,6 +16,7 @@ public class CustomerResponseDTO implements Serializable, Cloneable {
 	private StatusResponseDTO status;
 	private RolResponseDTO rol;
 	private CustomerTypeResponseDTO customerType;
+	private AddressesResponseDTO address;
 
 	public Integer getId() {
 		return id;
@@ -103,6 +104,14 @@ public class CustomerResponseDTO implements Serializable, Cloneable {
 
 	public void setCustomerType(CustomerTypeResponseDTO customerType) {
 		this.customerType = customerType;
+	}
+
+	public AddressesResponseDTO getAddress() {
+		return address;
+	}
+
+	public void setAddress(AddressesResponseDTO address) {
+		this.address = address;
 	}
 
 }

@@ -14,12 +14,16 @@ co\com\kallsonys\dto\request\CreateProductRequestDTO.class
 co\com\kallsonys\dto\response\ProductDetailResponseDTO.class
 co\com\kallsonys\interfaces\IRCampaign.class
 co\com\kallsonys\dto\response\CreateCampaignResponseDTO.class
+co\com\kallsonys\dto\response\GetCategoriesByLstIdProductResponseDTO.class
+co\com\kallsonys\dto\request\GetCategByLstIdProductRequestDTO.class
 co\com\kallsonys\dto\request\RequestProductDetailDTO.class
 co\com\kallsonys\dto\response\ProducerResponseDTO.class
 co\com\kallsonys\interfaces\ILCampaign.class
 co\com\kallsonys\dto\response\ProductResponseDTO.class
 co\com\kallsonys\interfaces\ILProducts.class
 co\com\kallsonys\enums\EnumStatus.class
+co\com\kallsonys\dto\response\GetCategByLstIdProductResponseDTO.class
 co\com\kallsonys\dto\CampaignsDTO.class
 co\com\kallsonys\dto\ProducersDTO.class
 co\com\kallsonys\dto\CategoriesDTO.class
+co\com\kallsonys\dto\DetailResponseWSDTO.class

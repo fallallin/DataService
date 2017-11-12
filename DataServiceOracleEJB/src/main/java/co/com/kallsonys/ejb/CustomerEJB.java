@@ -13,6 +13,7 @@ import javax.persistence.PersistenceContext;
 import org.jboss.logging.Logger;
 
 import co.com.kallsonys.dto.request.CustomerRequestDTO;
+import co.com.kallsonys.dto.response.AddressesResponseDTO;
 import co.com.kallsonys.dto.response.CustomerResponseDTO;
 import co.com.kallsonys.dto.response.CustomerTypeResponseDTO;
 import co.com.kallsonys.dto.response.GetCustomerByIdResponseDTO;
@@ -20,10 +21,12 @@ import co.com.kallsonys.dto.response.RolResponseDTO;
 import co.com.kallsonys.dto.response.SetCustomerResponseDTO;
 import co.com.kallsonys.dto.response.StatusResponseDTO;
 import co.com.kallsonys.entity.CustomerTypes;
+import co.com.kallsonys.entity.CustomersAddresses;
 import co.com.kallsonys.entity.Orders;
 import co.com.kallsonys.entity.Roles;
 import co.com.kallsonys.entity.Status;
 import co.com.kallsonys.entity.Users;
+import co.com.kallsonys.helpers.AddressesHelper;
 import co.com.kallsonys.interfaces.ILCustomer;
 import co.com.kallsonys.interfaces.ILLocation;
 import co.com.kallsonys.interfaces.IRCustomer;
@@ -59,28 +62,28 @@ public class CustomerEJB implements ILCustomer, IRCustomer {
 		List<CustomerResponseDTO> listCustomersDTO = new ArrayList<CustomerResponseDTO>();
 		CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO();
 
-		if (customerDTO != null){
+		if (customerDTO != null) {
 			if (customerDTO.getId() != null) {
 				jpql.append(" AND c.id = :idCustomer ");
 				filtros.put("idCustomer", customerDTO.getId());
-			} 
-			
-			if(customerDTO.getIdentification() != null){
-				jpql.append(" AND c.identification = :identification ");
-				filtros.put("identification", customerDTO.getIdentification() );
 			}
-			
-			if(customerDTO.getEmail() != null) {
+
+			if (customerDTO.getIdentification() != null) {
+				jpql.append(" AND c.identification = :identification ");
+				filtros.put("identification", customerDTO.getIdentification());
+			}
+
+			if (customerDTO.getEmail() != null) {
 				jpql.append(" AND c.email = :email ");
 				filtros.put("email", customerDTO.getEmail());
-			} 
-			
-			if(customerDTO.getLogin() != null){
+			}
+
+			if (customerDTO.getLogin() != null) {
 				jpql.append(" AND c.login = :login ");
 				filtros.put("login", customerDTO.getLogin());
 			}
-		
-		}else {
+
+		} else {
 			getCustomerByIdResponseDTO.setResponse(false);
 			getCustomerByIdResponseDTO.setResponseDescription("failture");
 			getCustomerByIdResponseDTO.setListCustomers(listCustomersDTO);
@@ -122,6 +125,8 @@ public class CustomerEJB implements ILCustomer, IRCustomer {
 					customerResponseDTO.getCustomerType().setIdCustomerType(user.getCustomerType().getId());
 					customerResponseDTO.getCustomerType().setCustomerType(user.getCustomerType().getUsertype());
 				}
+				
+				customerResponseDTO.setAddress(getAddressByIdUser(user.getId()));
 
 				listCustomersDTO.add(customerResponseDTO);
 			}
@@ -210,4 +215,37 @@ public class CustomerEJB implements ILCustomer, IRCustomer {
 		return setCustomerResponseDTO;
 	}
 
+	public AddressesResponseDTO getAddressByIdUser(Integer idUser) {
+
+		logger.debug(LocationEJB.class.getName().concat("::getAddressByIdUser()"));
+		StringBuilder jpql = new StringBuilder();
+		Map<String, Object> filtros = new HashMap<>();
+		jpql.append("SELECT ca FROM CustomersAddresses ca");
+		jpql.append(" LEFT JOIN FETCH ca.customer c");
+		jpql.append(" LEFT JOIN FETCH ca.address a");
+		jpql.append(" LEFT JOIN FETCH a.city ct");
+		jpql.append(" LEFT JOIN FETCH a.state st");
+		jpql.append(" LEFT JOIN FETCH a.country cy");
+		jpql.append(" WHERE 1 = 1");
+
+		List<CustomerResponseDTO> listCustomersDTO = new ArrayList<CustomerResponseDTO>();
+		AddressesResponseDTO addressesResponseDTO = new AddressesResponseDTO();
+
+		if (idUser != null) {
+			jpql.append(" AND c.id = :idUser ");
+			filtros.put("idUser", idUser);
+		}
+		
+		
+		GenericDao<CustomersAddresses> dao = new GenericDao<CustomersAddresses>(CustomersAddresses.class, em);
+		List<CustomersAddresses> resultadoConsulta = dao.buildAndExecuteQuery(jpql, filtros);
+		if (!resultadoConsulta.isEmpty()) {
+			addressesResponseDTO = AddressesHelper.buildAddressesResponseDTO( resultadoConsulta.get(0).getAddress());
+		}
+		
+		
+		
+		return addressesResponseDTO;
+
+	}
 }

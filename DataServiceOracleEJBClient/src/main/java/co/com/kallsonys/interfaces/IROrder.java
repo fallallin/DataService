@@ -4,8 +4,10 @@ import javax.ejb.Remote;
 
 import co.com.kallsonys.dto.request.CreateOrderRequestDTO;
 import co.com.kallsonys.dto.request.CustomerRequestDTO;
+import co.com.kallsonys.dto.request.GetOrdersByDatesRequestDTO;
 import co.com.kallsonys.dto.request.OrderRequestDTO;
 import co.com.kallsonys.dto.response.GetOrderByIdResponseDTO;
+import co.com.kallsonys.dto.response.IdProductsListResponseDTO;
 import co.com.kallsonys.dto.response.OrderDetailResponseDTO;
 import co.com.kallsonys.dto.response.OrderResponseDTO;
 
@@ -21,4 +23,6 @@ public interface IROrder {
 	public void createCustomersOrders(OrderRequestDTO orderRequestDTO, CustomerRequestDTO customerRequestDTO);
 
 	public CreateOrderRequestDTO upadateOrder(CreateOrderRequestDTO createOrderRequestDTO);
+	
+	public IdProductsListResponseDTO getOrdersByDates(GetOrdersByDatesRequestDTO getOrdersByDatesRequestDTO);
 }

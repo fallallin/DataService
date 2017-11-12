@@ -1,19 +1,24 @@
 package co.com.kallsonys.ejb;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.hibernate.criterion.Order;
 import org.jboss.logging.Logger;
 
 import co.com.kallsonys.dto.request.CreateOrderRequestDTO;
 import co.com.kallsonys.dto.request.CustomerRequestDTO;
+import co.com.kallsonys.dto.request.GetOrdersByDatesRequestDTO;
 import co.com.kallsonys.dto.request.OrderRequestDTO;
 import co.com.kallsonys.dto.response.AddressesResponseDTO;
 import co.com.kallsonys.dto.response.CitiesResponseDTO;
@@ -21,9 +26,12 @@ import co.com.kallsonys.dto.response.CountriesResponseDTO;
 import co.com.kallsonys.dto.response.CustomerResponseDTO;
 import co.com.kallsonys.dto.response.CustomerTypeResponseDTO;
 import co.com.kallsonys.dto.response.GetOrderByIdResponseDTO;
+import co.com.kallsonys.dto.response.IdProductsListResponseDTO;
+import co.com.kallsonys.dto.response.ItemResponseDTO;
 import co.com.kallsonys.dto.response.OrderDetailResponseDTO;
 import co.com.kallsonys.dto.response.OrderRelationResponseDTO;
 import co.com.kallsonys.dto.response.OrderResponseDTO;
+import co.com.kallsonys.dto.response.ProductRankingResponseDTO;
 import co.com.kallsonys.dto.response.RolResponseDTO;
 import co.com.kallsonys.dto.response.StatesResponseDTO;
 import co.com.kallsonys.dto.response.StatusResponseDTO;
@@ -122,7 +130,6 @@ public class OrderEJB implements ILOrder, IROrder {
 		jpql.append(" LEFT JOIN FETCH c.rol r");
 		jpql.append(" LEFT JOIN FETCH c.status sc");
 		jpql.append(" LEFT JOIN FETCH c.customerType cty");
-
 		jpql.append(" WHERE 1 = 1");
 
 		if (idOrder != null) {
@@ -150,9 +157,15 @@ public class OrderEJB implements ILOrder, IROrder {
 			if (customersOrders.getOrder() != null) {
 				getOrderByIdResponseDTO.getOrderRelation()
 						.setOrder(OrderHelper.buildOrderResponseDTO(customersOrders.getOrder()));
+				
+				getOrderByIdResponseDTO.getOrderRelation()
+				.getOrder().setItems(this.getItemsByIdOrder(customersOrders.getOrder().getId()));
+				
 			} else {
 				getOrderByIdResponseDTO.getOrderRelation().setOrder(new OrderResponseDTO());
 			}
+			
+			
 
 		}
 
@@ -160,7 +173,34 @@ public class OrderEJB implements ILOrder, IROrder {
 		getOrderByIdResponseDTO.setResponseDescription("success");
 
 		return getOrderByIdResponseDTO;
+	}
 
+	public List<ItemResponseDTO> getItemsByIdOrder(Integer idOrder) {
+
+		List<ItemResponseDTO> lstItemResponseDTO = new ArrayList<ItemResponseDTO>();
+
+		StringBuilder jpql = new StringBuilder();
+		Map<String, Object> filtros = new HashMap<>();
+		jpql.append("SELECT i FROM Items i");
+		jpql.append(" LEFT JOIN FETCH i.order o");
+		jpql.append(" WHERE 1 = 1");
+
+		if (idOrder != null) {
+			jpql.append(" AND o.id = :idOrder ");
+			filtros.put("idOrder", idOrder);
+		}
+
+		GenericDao<Items> dao = new GenericDao<Items>(Items.class, em);
+		List<Items> resultadoConsulta = dao.buildAndExecuteQuery(jpql, filtros);
+		if (!resultadoConsulta.isEmpty()) {
+			for (Items item : resultadoConsulta) {
+
+				lstItemResponseDTO.add(ItemsHelper.buildItemResponseDTO(item));
+			}
+
+		}
+
+		return lstItemResponseDTO;
 	}
 
 	@Override
@@ -180,7 +220,7 @@ public class OrderEJB implements ILOrder, IROrder {
 		Users customer = CustomerHelper.buildCustomerEntity(createOrderRequestDTO.getCustomer());
 		CustomersOrders customersOrders = new CustomersOrders(null, order, customer);
 		em.persist(customersOrders);
-		
+
 		return OrderHelper.buildOrderResponseDTO(order);
 	}
 
@@ -246,6 +286,68 @@ public class OrderEJB implements ILOrder, IROrder {
 		}
 
 		return new CustomersOrders();
+	}
+
+	@Override
+	public IdProductsListResponseDTO getOrdersByDates(GetOrdersByDatesRequestDTO getOrdersByDatesRequestDTO) {
+		logger.debug(LocationEJB.class.getName().concat("::getOrdersByDates(GetOrdersByDatesRequestDTO)"));
+
+		IdProductsListResponseDTO lstProducts = new IdProductsListResponseDTO();
+
+		lstProducts.setListIdProduct(new ArrayList<Integer>());
+
+		StringBuilder query = new StringBuilder();
+		Map<String, Object> param = new HashMap<String, Object>();
+
+		query.append("SELECT a.externalidentifier");
+		query.append(" FROM items a");
+		query.append(" INNER JOIN orders o on o.id = a.idorder");
+		query.append(" WHERE o.orderdate BETWEEN :initialDate AND :finalDate");
+		query.append(" GROUP BY a.externalidentifier ORDER BY a.externalidentifier ASC");
+
+		if (getOrdersByDatesRequestDTO == null) {
+			lstProducts.setResponse(false);
+			lstProducts.setResponseDescription("missing dates");
+			return lstProducts;
+		}
+
+		if (getOrdersByDatesRequestDTO.getInitialDate() != null) {
+			param.put("initialDate", getOrdersByDatesRequestDTO.getInitialDate());
+		} else {
+			lstProducts.setResponse(false);
+			lstProducts.setResponseDescription("missing initialDate");
+			return lstProducts;
+		}
+
+		if (getOrdersByDatesRequestDTO.getFinalDate() != null) {
+			param.put("finalDate", getOrdersByDatesRequestDTO.getFinalDate());
+		} else {
+			lstProducts.setResponse(false);
+			lstProducts.setResponseDescription("missing finalDate");
+			return lstProducts;
+		}
+
+		Query querySQL = em.createNativeQuery(query.toString());
+
+		for (Entry<String, Object> parameter : param.entrySet()) {
+			querySQL.setParameter(parameter.getKey(), parameter.getValue());
+		}
+
+		@SuppressWarnings({ "unchecked" })
+		List<String> productList = querySQL.getResultList();
+
+		if (productList != null && !productList.isEmpty()) {
+
+			for (String product : productList) {
+				if (product != null) {
+					lstProducts.getListIdProduct().add(Integer.valueOf(product));
+				}
+			}
+		}
+		lstProducts.setResponse(true);
+		lstProducts.setResponseDescription("success");
+
+		return lstProducts;
 	}
 
 }

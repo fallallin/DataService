@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 
 import java.io.InputStreamReader;
-
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,18 +17,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 
 import co.com.kallsonys.interfaces.IRProducts;
+import co.com.kallsonys.util.ArrayUtil;
 import co.com.kallsonys.util.GenericDao;
 import co.com.kallsonys.interfaces.ILProducts;
 
-
 import co.com.kallsonys.dto.request.CreateProductRequestDTO;
+import co.com.kallsonys.dto.request.GetCategByLstIdProductRequestDTO;
 import co.com.kallsonys.dto.request.RequestProductDetailDTO;
+import co.com.kallsonys.dto.response.GetCategByLstIdProductResponseDTO;
+import co.com.kallsonys.dto.response.GetCategoriesByLstIdProductResponseDTO;
 import co.com.kallsonys.dto.response.GetProductByIdResponseDTO;
 import co.com.kallsonys.dto.response.ProducerResponseDTO;
 import co.com.kallsonys.dto.response.ProductDetailResponseDTO;
@@ -272,7 +274,6 @@ public class ProductEJB implements ILProducts, IRProducts {
 
 	public void consultarPrefactura() {
 
-
 		ClientRequest request = new ClientRequest(
 				"http://192.168.1.182:8984/solr/productsCore/select?indent=on&q=*:*&wt=json&sort=id%20asc&rows=10&start=0");
 
@@ -301,6 +302,97 @@ public class ProductEJB implements ILProducts, IRProducts {
 			e.printStackTrace();
 
 		}
+
+	}
+
+	@Override
+	public GetCategoriesByLstIdProductResponseDTO getCategByLstIdProduct(GetCategByLstIdProductRequestDTO request) {
+		logger.debug("ProductEJB::GetCategByLstIdProductResponseDTO(GetCategByLstIdProductRequestDTO)");
+
+		GetCategoriesByLstIdProductResponseDTO response = new GetCategoriesByLstIdProductResponseDTO();
+		GetCategByLstIdProductResponseDTO categ = new GetCategByLstIdProductResponseDTO();
+		response.setCategories(new ArrayList<GetCategByLstIdProductResponseDTO>());
+
+		StringBuilder query = new StringBuilder();
+		Map<String, Object> param = new HashMap<String, Object>();
+
+		if (request == null) {
+			response.setResponse(false);
+			response.setResponseDescription("missing data");
+			return response;
+		}
+
+		//String strIdsProducts = ArrayUtil.converListToString(request.getListIdProducts());
+
+		query.append("WITH Results_CTE AS (");
+		query.append(" SELECT c.category, ");
+		query.append(" count(*) as quantity, ");
+		query.append(" c.id, ");
+		query.append(" ROW_NUMBER() OVER(ORDER BY count(*) DESC) AS RowNum");
+		query.append(" FROM categories AS c");
+		query.append(" INNER JOIN productscategories AS pc ON c.id = pc.idcategory");
+		query.append(" INNER JOIN products AS p ON pc.idproduct = p.id");
+		query.append(" WHERE p.id in (" + request.getStrIdsProducts() + ")");
+		query.append(" GROUP BY c.category, c.id )");
+		query.append(" SELECT * FROM Results_CTE WHERE RowNum >= :initialPage AND RowNum <= :finalPage");
+
+		if (request.getInitialPage() != null) {
+			param.put("initialPage", request.getInitialPage());
+		} else {
+			response.setResponse(false);
+			response.setResponseDescription("missing initialPage");
+			return response;
+		}
+
+		if (request.getFinalPage() != null) {
+			param.put("finalPage", request.getFinalPage());
+		} else {
+			response.setResponse(false);
+			response.setResponseDescription("missing finalDate");
+			return response;
+		}
+		try {
+			Query querySQL = em.createNativeQuery(query.toString());
+
+			for (Entry<String, Object> parameter : param.entrySet()) {
+				querySQL.setParameter(parameter.getKey(), parameter.getValue());
+			}
+
+			@SuppressWarnings({ "unchecked" })
+			List<String> productList = querySQL.getResultList();
+
+			List<Object[]> categorytList = querySQL.getResultList();
+
+			if (categorytList != null && !categorytList.isEmpty()) {
+
+				for (Object[] category : categorytList) {
+					categ = new GetCategByLstIdProductResponseDTO();
+
+					if (category[0] != null) {
+						categ.setCategory((String) category[0]);
+					}
+
+					if (category[1] != null) {
+						categ.setQuantity((Integer) category[1]);
+					}
+
+					if (category[2] != null) {
+						categ.setId((Integer) category[2]);
+					}
+
+					response.getCategories().add(categ);
+				}
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		response.setResponse(true);
+		response.setResponseDescription("success");
+		
+
+		return response;
 
 	}
 

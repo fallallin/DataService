@@ -12,6 +12,7 @@ co\com\kallsonys\entity\Images.class
 co\com\kallsonys\ejb\CampaignEJB.class
 co\com\kallsonys\entity\Roles.class
 co\com\kallsonys\entity\Entidad.class
+co\com\kallsonys\util\ArrayUtil.class
 co\com\kallsonys\entity\CampaignsProducts.class
 co\com\kallsonys\helpers\ProducersHelper.class
 co\com\kallsonys\entity\Products.class
